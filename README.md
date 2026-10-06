@@ -6,7 +6,7 @@ proxy gateway with a beautiful multi-user dashboard, originally built for
 line of the upstream worker code** — so it runs on **[Railway](https://railway.com)**
 (any Node.js 20+ host works too).
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.com/new/template?repo=https://github.com/mewshiam/Nahan-rail)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.com/new/template?template=https://github.com/mewshiam/Nahan-rail)
 [![Upstream](https://img.shields.io/badge/upstream-itsyebekhe%2Fnahan-222?style=flat-square&logo=github)](https://github.com/itsyebekhe/nahan)
 [![Node](https://img.shields.io/badge/Node.js-%E2%89%A520-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
 
@@ -34,27 +34,73 @@ Everything the Cloudflare version offers, on Railway:
 
 ## 🚀 Deploy to Railway
 
-### One click
+The whole infrastructure is declared as code in **[`.railway/railway.ts`](./.railway/railway.ts)**
+(Railway Infrastructure as Code) — service, volume, environment variables,
+healthcheck — and **[`deploy.sh`](./deploy.sh)** provisions it with **one command**,
+public domain included. No dashboard clicking required.
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.com/new/template?repo=https://github.com/mewshiam/Nahan-rail)
+### One command (recommended)
 
-### Or manually
+```bash
+git clone https://github.com/mewshiam/Nahan-rail
+cd Nahan-rail
+bash deploy.sh
+```
 
-1. Push/fork this repo to your GitHub account.
-2. In Railway: **New Project → Deploy from GitHub repo** → pick the repo.
-3. Railway detects the `Dockerfile` automatically and builds it. `PORT` is
-   injected by Railway — the app binds it automatically.
-4. When the deploy is healthy, open **Settings → Networking → Generate Domain**
-   to get your `https://<name>.up.railway.app` URL.
+`deploy.sh` is **idempotent** — safe to re-run — and creates all of this:
 
-### Recommended: attach a volume (persistent settings)
+| Step | What is created | Detail |
+|---|---|---|
+| 1 | Railway CLI | installed globally via npm if missing |
+| 2 | Login | `railway login` (or your `RAILWAY_TOKEN` in CI) |
+| 3 | Project | created & linked (or pass `--project <name>` to reuse one) |
+| 4 | Service `nahan` | via `railway config apply` — Dockerfile build, `start`, healthcheck `/_health` |
+| 5 | Volume `nahan-data` | **512 MB mounted at `/data`** — the SQLite database survives redeploys |
+| 6 | Port | `PORT` injected by Railway — the app binds `0.0.0.0:$PORT` automatically |
+| 7 | Domain | **free `https://<name>.up.railway.app`** via `railway domain` |
+| 8 | Deployment | builds from the GitHub source (see below) |
 
-Without a volume, your configuration/settings reset when Railway redeploys
-(the container filesystem is ephemeral).
+Useful flags:
 
-1. In your Railway service: **Settings → Volumes → New Volume**.
-2. Mount path: `/data` (Railway then sets `RAILWAY_VOLUME_MOUNT_PATH` for you).
-3. Redeploy. The SQLite database now persists across deploys and restarts.
+```bash
+bash deploy.sh --up                        # push local code with `railway up` instead of the GitHub source
+bash deploy.sh --project my-existing-proj  # adopt an existing Railway project
+bash deploy.sh --domain nahan.example.com  # custom domain instead of *.up.railway.app
+RAILWAY_TOKEN=… bash deploy.sh             # CI / non-interactive (project token)
+```
+
+> **Private repo?** The `source` in `.railway/railway.ts` points at this
+> private repository, so grant Railway's GitHub App access **once**:
+> Railway → Account Settings → Integrations → GitHub → *Edit Scope*.
+> Don't want that? Run `bash deploy.sh --up` — it uploads the code directly.
+
+### From the dashboard (no CLI)
+
+1. In Railway: **New Project → Deploy from GitHub repo** → pick *Nahan-rail*.
+2. **Name the service `nahan`** when you add it (so `.railway/railway.ts`
+   adopts it — or edit the service name in that file to match yours).
+3. Railway detects the `Dockerfile` automatically; `PORT` is injected for you.
+4. Finish the rest (volume + env + domain) in one command:
+   ```bash
+   bash deploy.sh --project <your-project-name>
+   ```
+   Or manually: **Settings → Volumes → New Volume** (mount `/data`), then
+   **Settings → Networking → Generate Domain**.
+
+### CI — apply the infra on merge
+
+`.github/workflows/railway-config.yml` plans `.railway/` changes on PRs and
+applies them on merge, once you add the `RAILWAY_TOKEN` repository secret
+(project token scoped to production). After that, `git push` is your entire
+deploy pipeline: infra changes **and** code both ship automatically.
+
+### One-click button
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.com/new/template?template=https://github.com/mewshiam/Nahan-rail)
+
+> The button creates a *template* deployment — it needs the repo to be public,
+> and it does **not** attach the volume/domain automatically the way
+> `deploy.sh` does. Prefer the one command above.
 
 > Tip: Railway's free trial / hobby pricing covers this tiny service easily —
 > the gateway idles at a few MB of RAM and no CPU.
@@ -62,6 +108,9 @@ Without a volume, your configuration/settings reset when Railway redeploys
 ---
 
 ## ⚙️ Environment variables
+
+`NODE_ENV` and `DATA_DIR=/data` are preset by `.railway/railway.ts`; `PORT` is
+injected by Railway itself. The rest is optional:
 
 | Variable | Required | Default | Description |
 |---|---|---|---|

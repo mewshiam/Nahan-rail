@@ -7,7 +7,10 @@
   "main": "railway/server.js",
   "scripts": {
     "start": "node railway/server.js",
-    "build": "node -e \"require('fs').existsSync('_worker.js') ? 0 : process.exit(1)\""
+    "build": "node -e \"require('fs').existsSync('_worker.js') ? 0 : process.exit(1)\"",
+    "deploy": "bash deploy.sh",
+    "railway:plan": "railway config plan",
+    "railway:apply": "railway config apply"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -15,6 +18,9 @@
   "dependencies": {
     "better-sqlite3": "^12.4.1",
     "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "railway": "^3.12.0"
   },
   "repository": {
     "type": "git",

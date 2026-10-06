@@ -10,3 +10,9 @@ worker.mjs
 !.env.example
 npm-debug.log*
 .DS_Store
+
+# Railway: the CLI stores its local project link inside .railway/ — ignore it,
+# but always COMMIT the Infrastructure-as-Code files.
+.railway/*
+!.railway/railway.ts
+!.railway/README.md
