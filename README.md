@@ -1,254 +1,185 @@
-# Project Nahan (پروژه نهان)
+# Nahan on Railway 🚂
 
-### The Ultimate Serverless Gateway on Cloudflare Workers
+**[Nahan](https://github.com/itsyebekhe/nahan)** (نهان — Persian for *Hidden*) is a VLESS/Trojan
+proxy gateway with a beautiful multi-user dashboard, originally built for
+**Cloudflare Workers**. This repository ports it — **without modifying a single
+line of the upstream worker code** — so it runs on **[Railway](https://railway.com)**
+(any Node.js 20+ host works too).
 
-**Nahan** (Persian for *Hidden/Concealed*) is a secure, lightweight, and highly customizable reverse proxy that runs entirely on the edge. It transforms your Cloudflare Worker into a powerful, obfuscated gateway using **VLESS** or **Trojan** protocols, managed via a beautiful, self-contained Web UI.
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.com/new/template?repo=https://github.com/mewshiam/Nahan-rail)
+[![Upstream](https://img.shields.io/badge/upstream-itsyebekhe%2Fnahan-222?style=flat-square&logo=github)](https://github.com/itsyebekhe/nahan)
+[![Node](https://img.shields.io/badge/Node.js-%E2%89%A520-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
 
-[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-F38020?style=for-the-badge&logo=Cloudflare&logoColor=white)](https://workers.cloudflare.com/)
-[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](./LICENSE)
-[![JavaScript](https://img.shields.io/badge/JavaScript-100%25-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://github.com/itsyebekhe/nahan/blob/main/_worker.js)
-
-> 🇮🇷 [نسخه فارسی / Persian Version](./README_FA.md)
-
----
-
-## 📖 Table of Contents
-
-- [Why Nahan?](#-why-nahan)
-- [Key Features](#-key-features)
-- [Prerequisites](#-prerequisites)
-- [Quick Install Options](#-quick-install-options)
-- [Step-by-Step Deployment Guide](#-step-by-step-deployment-guide)
-- [Dashboard Guide](#-dashboard-guide)
-- [Advanced Configuration](#-advanced-configuration)
-- [Useful Resources](#-useful-resources)
-- [Applying Configuration Changes](#-applying-configuration-changes)
-- [FAQ & Troubleshooting](#-faq--troubleshooting)
-- [Contributing](#-contributing)
-- [License](#-license)
+> ℹ️ The original Cloudflare Workers deployment guide is preserved in
+> [README-CLOUDFLARE.md](./README-CLOUDFLARE.md) · راهنمای فارسی: [README_FA.md](./README_FA.md)
 
 ---
 
-## 🌟 Why Nahan?
+## ✨ What you get
 
-Nahan isn't just a proxy script — it's a complete management solution designed for **stealth**, **speed**, and **ease of use**.
+Everything the Cloudflare version offers, on Railway:
 
-- 🛡️ **Hidden in Plain Sight:** Unauthorized access attempts are proxied to legitimate sites (e.g., `ubuntu.com` or `docker.com`), making your gateway look like a regular website to network scanners.
-- ⚡ **Zero Server Cost:** Runs entirely on Cloudflare's free plan. No VPS, no server maintenance.
-- 🎨 **Modern Dashboard:** A fully embedded, mobile-friendly dashboard with Dark/Light modes and dual-language support (English / فارسی).
-- 🤖 **Telegram Bot Integration:** Manage your gateway, check usage, and receive login alerts directly via Telegram.
-- 📡 **Multi-User & Multi-IP:** Generate dedicated subscription links for different users and automatically combine them with clean IP lists.
-- 💾 **D1 SQLite Storage:** Configuration persists in Cloudflare D1 database, eliminating KV write limitations.
-
----
-
-## ✨ Key Features
-
-| Feature | Description |
+| Feature | Notes |
 |---|---|
-| 🔐 **Dual Protocol** | Switch instantly between **VLESS** (Alpha), **Trojan** (Beta), or **Both** simultaneously |
-| 📱 **QR Code Generation** | Modal-based QR codes for instant mobile client configuration |
-| 👥 **Multi-User Profiles** | Create separate profiles with unique subscription links, per-user nodes, and per-user NAT64 |
-| 🌍 **Clean IP Multiplexer** | Input a list of clean Cloudflare IPs — Nahan auto-generates configs for all of them |
-| 🌐 **NAT64 Support** | Automatic IPv4-to-NAT64-mapped IPv6 conversion with multiple prefix support |
-| ⚙️ **Real-Time Metrics** | View Origin IP, Edge Node location, and run browser-side latency diagnostics |
-| 💾 **D1 SQLite Storage** | All configuration persists in Cloudflare D1 even after code updates |
-| 🚨 **Kill Switch** | Immediately pause all proxy traffic with one click from the dashboard or Telegram |
-| 📊 **Bandwidth Management** | Track per-user upload/download with TB/GB limits and pause/resume controls |
-| 📋 **Activity Logs** | Full history of login attempts and configuration changes |
-| 🔒 **ECH Support** | Toggle Encrypted Client Hello (ECH) parameters in generated client configs |
-| 📦 **Backup & Restore** | Export/import your full configuration as a `.json` file |
-| 🔄 **Auto Update** | Automatic deployment of new versions from GitHub with format and obfuscation options |
-| 🎭 **Configurable Fake Configs** | Customizable fake subscription entries with `{usage}` and `{expiry}` template variables |
-| 🖥️ **Per-User Nodes** | Define custom hostnames per subscriber for multi-region deployments |
-| 🏷️ **Rich Name Strategy** | Config naming with `{FLAG}`, `{COUNTRY}`, `{CITY}`, `{ISP}`, `{HOST}`, `{DATE}`, `{WORKER}` tags |
-| 🌐 **Bilingual Subscription Page** | Subscription info page with full **Persian/Farsi** and **English** support, RTL layout, and dark/light mode toggle |
-| 🤖 **Telegram Bot Management** | Full gateway management via inline Telegram buttons — users, settings, logs, and advanced config |
-| 🔗 **Linked Panels (Other Nodes)** | Connect multiple Nahan panels securely with API Keys for cross-panel management and update propagation |
+| 🔐 VLESS & Trojan | both protocols over WebSocket, TLS provided by Railway's edge |
+| 🖥️ Full dashboard | served from this repo (self-contained, no GitHub fetch needed) |
+| 💾 Persistent config | SQLite (D1-compatible shim) — attach a Railway volume to survive redeploys |
+| 🌍 Clean IP multiplexer, NAT64, ECH | all client-config features work |
+| 👥 Multi-user profiles | per-user subscriptions, limits, nodes |
+| 🤖 Telegram bot | full gateway management via bot |
+| 🚨 Kill switch | pause all proxy traffic instantly |
+| 📊 Usage tracking | per-user bandwidth/request accounting |
 
 ---
 
-## 🔧 Prerequisites
+## 🚀 Deploy to Railway
 
-- A **Cloudflare account** (free tier is sufficient) — [sign up here](https://dash.cloudflare.com/sign-up)
-- Access to **Workers & Pages** and **D1 SQLite Database** in your Cloudflare Dashboard
-- A modern web browser
-- *(Optional)* A Telegram Bot Token and Chat ID for bot integration
+### One click
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.com/new/template?repo=https://github.com/mewshiam/Nahan-rail)
+
+### Or manually
+
+1. Push/fork this repo to your GitHub account.
+2. In Railway: **New Project → Deploy from GitHub repo** → pick the repo.
+3. Railway detects the `Dockerfile` automatically and builds it. `PORT` is
+   injected by Railway — the app binds it automatically.
+4. When the deploy is healthy, open **Settings → Networking → Generate Domain**
+   to get your `https://<name>.up.railway.app` URL.
+
+### Recommended: attach a volume (persistent settings)
+
+Without a volume, your configuration/settings reset when Railway redeploys
+(the container filesystem is ephemeral).
+
+1. In your Railway service: **Settings → Volumes → New Volume**.
+2. Mount path: `/data` (Railway then sets `RAILWAY_VOLUME_MOUNT_PATH` for you).
+3. Redeploy. The SQLite database now persists across deploys and restarts.
+
+> Tip: Railway's free trial / hobby pricing covers this tiny service easily —
+> the gateway idles at a few MB of RAM and no CPU.
 
 ---
 
-## 🚀 Quick Install Options
+## ⚙️ Environment variables
 
-For easier deployment you can use:
-
-- **Telegram Install Bot:** [@itsyebekhebot](https://t.me/itsyebekhebot)
-- **Web Installer:** [https://erpycode.github.io/nahan-installer/](https://erpycode.github.io/nahan-installer/)
-
-Or follow the manual steps below.
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `PORT` | ✅ (auto-set by Railway) | `3000` | Listen port — injected by Railway, don't set it manually. |
+| `RELAY_IP` | — | unset | Default relay/proxy IP (same as wrangler `[vars] RELAY_IP` on Cloudflare). Also configurable later from the dashboard. |
+| `DASHBOARD_URL` | — | bundled `dashboard.html` | Override the dashboard HTML source. |
+| `SUBSCRIPTION_URL` | — | bundled `subscription.html` | Override the subscription page HTML source. |
+| `DATA_DIR` | — | Railway volume, else `./data` | Where `nahan.db` (SQLite) is stored. |
+| `SCHEDULED_INTERVAL_MIN` | — | `60` | How often the Workers cron (auto-update check) is emulated. |
+| `WORKER_FILE` | — | `_worker.js` | Use a different worker source file (e.g. a newer upstream drop). |
+| `NAHAN_DEBUG` | — | unset | Set to `1` to log socket/ WebSocket lifecycle for troubleshooting. |
 
 ---
 
-## 🚀 Step-by-Step Deployment Guide
+## 📖 First run (same as upstream)
 
-### Step 1: Create a D1 Database
+1. Open **`https://<your-app>.up.railway.app/sync/dash`**
+   (visiting `/` shows the Ubuntu/Docker camouflage page — that's intentional).
+2. Log in with the default master key: **`admin`**.
+3. Immediately in **System**:
+   - change the **Master Key**,
+   - change **API Route** to a secret path (bookmark the new URL!),
+   - set or auto-generate the **Device UUID**.
+4. Click **Update Config**.
 
-1. Log in to the [Cloudflare Dashboard](https://dash.cloudflare.com/).
-2. Go to **Storage and databases** → **D1 SQLite Database**.
-3. Click **Create database**.
-4. Enter a name (e.g. `iot_db`) and click **Create**.
+Client connection URIs, QR codes and subscription links are shown in the
+**Endpoints** tab — e.g. `vless://<uuid>@<your-app>.up.railway.app:443?...`.
 
-### Step 2: Deploy the Worker
+Full usage documentation: [HELP.md](./HELP.md) · [README-CLOUDFLARE.md](./README-CLOUDFLARE.md)
 
-1. Go to **Workers & Pages** → **Create application** → **Create Worker**.
-2. Name it (e.g. `nahan-core`) and click **Deploy**.
-3. Click **Edit code**, delete the placeholder, and paste the full content of [`_worker.js`](https://github.com/itsyebekhe/nahan/blob/main/_worker.js).
-4. Click **Save and Deploy**.
+---
 
-### Step 3: Bind the D1 Database
-
-1. Open your Worker → **Settings** → **Bindings** → **Add binding**.
-2. Type: **D1 database**
-3. Variable name: **`IOT_DB`** (must be exact)
-4. Select the database you created → **Save** → **Deploy**.
-
-### Step 4: Access the Dashboard
-
-Open:
+## 🔧 How the port works
 
 ```
-https://<your-worker-domain>/sync/dash
+                ┌────────────────────────────────────────────────┐
+ browser/       │  Node.js HTTP server (railway/server.js)       │  TCP
+ vless client ──┤  • Request/Response bridging (WHATWG <-> Node)  ├─────────► upstream
+     wss://     │  • WebSocket upgrades via `ws`                  │  (net)
+                │  • /_health endpoint for Railway healthchecks   │
+                ├────────────────────────────────────────────────┤
+                │  runtime shims (railway/*.js)                   │
+                │  • cloudflare:sockets  → node:net + WebStreams  │
+                │  • WebSocketPair       → ws-backed pair shim    │
+                │  • D1 (IOT_DB)         → better-sqlite3         │
+                │  • Response{101,ws}    → patched global         │
+                │  • cron trigger        → setInterval            │
+                ├────────────────────────────────────────────────┤
+                │  _worker.js  (UPSTREAM CODE — UNMODIFIED)       │
+                │  imported as worker.mjs with one import rewrite │
+                └────────────────────────────────────────────────┘
 ```
 
-> Visiting `/` or `/sync` without `/dash` shows a camouflage page (Ubuntu/Docker). This is intentional.
+At startup `railway/server.js`:
 
-### Step 5: First-Time Configuration
+1. patches the global `Response` and installs `WebSocketPair`,
+2. generates `worker.mjs` from `_worker.js`, rewriting the single
+   `import { connect } from "cloudflare:sockets"` to the Node shim
+   (everything else in the 11k-line worker is standard Web API code that
+   Node 20+ already implements),
+3. binds `0.0.0.0:${PORT}` and forwards every HTTP request and WebSocket
+   upgrade to the worker's `fetch()` handler,
+4. serves `env.IOT_DB` from a D1-compatible shim over SQLite.
 
-1. Login with the default master key: `admin`
-2. Immediately go to **System** tab and:
-   - Change **Master Key**
-   - Change **API Route** to a secret path (bookmark the new URL!)
-   - Set or auto-generate **Device UUID**
-3. Click **Update Config**.
+### Differences vs the Cloudflare deployment
 
----
+- **Geo/colo metadata** (`request.cf`) doesn't exist off-Cloudflare — the
+  dashboard shows `Unknown` for country/city/ASN/colo. Everything else works.
+- **Auto-update** targets Cloudflare Workers via the CF API; on Railway, updates
+  arrive by redeploying this repo (git push). The scheduled task still runs so
+  linked-panel/telegram features keep working.
+- **Persistence** uses SQLite via an attached volume instead of Cloudflare D1.
+- **Outbound TCP** uses the Railway host's network directly (no Cloudflare egress).
 
-## 🖥️ Dashboard Guide
+### Updating from upstream
 
-The dashboard includes these main sections:
-
-| Tab | Purpose |
-|---|---|
-| **Overview** | User summary cards, traffic stats, and update banner |
-| **Endpoints** | Connection URIs, QR codes, and subscription links |
-| **Metrics** | Live usage, Origin IP, Edge Node (Colo), latency diagnostics |
-| **System** | Core settings (protocol, UUID, API Route, Master Key, ports, Auto-Update, Panel API Keys, Backup) |
-| **Advanced** | Clean IPs, Linked Panels, Multi-User, Telegram, Kill Switch, ECH, NAT64, etc. |
-| **Logs** | Login attempts and configuration change history |
-| **Clients** | Visual multi-user management |
-| **Help** | Built-in help and FAQ |
-
----
-
-## 🔩 Advanced Configuration
-
-### Clean IP Multiplexer
-
-In **Advanced** → **Clean IPs**, enter one IP (or `IP#Name`) per line. The subscription will contain a separate config for each IP.
-
-**Recommended tools for finding Clean IPs:**
-- GitHub: [senpaiscanner](https://github.com/senpaiscanner)
-- Telegram: [@itsZetaBot](https://t.me/itsZetaBot)
-
-### Relay IP
-
-Recommended bot: [@nahanproxyipbot](https://t.me/nahanproxyipbot)
-
-### Linked Panels (Other Nodes)
-
-Connect external Nahan panels using **URL + API Key** for cross-panel management and update propagation.  
-(Legacy `slaveNodes` / Cascade fields are automatically migrated to `linkedPanels`.)
-
-### Multi-User Profiles
-
-Format (one per line):
-
-```
-<uuid>:Username
+```bash
+git remote add upstream https://github.com/itsyebekhe/nahan   # once
+git fetch upstream && git merge upstream/main
+git push
 ```
 
-Access: `https://<worker>/sync/sub?sub=Username`
-
-### Telegram Bot
-
-1. Create a bot via [@BotFather](https://t.me/botfather)
-2. Get Chat ID from [@userinfobot](https://t.me/userinfobot)
-3. Enter Token + Chat ID in Advanced tab and save
-
-Commands: `/status`, `/pause` (Kill Switch)
-
-### Kill Switch
-
-Toggle in Advanced (or send `/pause` via Telegram) to immediately stop all proxy traffic while keeping the worker alive.
+Railway redeploys automatically; the port layer only depends on the worker's
+documented API surface (fetch handler, `cloudflare:sockets`, `WebSocketPair`,
+D1 `prepare/bind/first/all/run`), which has been stable across releases.
 
 ---
 
-## 🔗 Useful Resources
+## 🛠️ Local development
 
-| Purpose | Resource |
-|---|---|
-| Clean IP finder | [senpaiscanner](https://github.com/senpaiscanner) · [@itsZetaBot](https://t.me/itsZetaBot) |
-| Relay IP | [@nahanproxyipbot](https://t.me/nahanproxyipbot) |
-| Easy Install (Telegram) | [@itsyebekhebot](https://t.me/itsyebekhebot) |
-| Web Installer | [erpycode.github.io/nahan-installer](https://erpycode.github.io/nahan-installer/) |
+```bash
+npm install        # installs ws + better-sqlite3
+npm start          # serves on http://127.0.0.1:3000
+# dashboard: http://127.0.0.1:3000/sync/dash  (default key: admin)
 
----
+# with debug tracing of sockets/websockets:
+NAHAN_DEBUG=1 npm start
 
-## 💾 Applying Configuration Changes
+# custom port:
+PORT=8080 npm start
+```
 
-After changing anything in **System** or **Advanced**:
+## 🐳 Docker (any host)
 
-1. Click **Update Config** at the bottom.
-2. Wait for “Syncing…” then the page reloads.
+```bash
+docker build -t nahan-rail .
+docker run -p 3000:3000 -v nahan-data:/data nahan-rail
+```
 
-If you changed the API Route, the page redirects to the new path — bookmark it.
-
----
-
-## ❓ FAQ & Troubleshooting
-
-**`⚠️ IOT_DB namespace missing!`**  
-→ D1 binding is missing or the variable name is not exactly `IOT_DB`. Fix in Worker Settings → Bindings and redeploy.
-
-**Root URL shows Ubuntu/Docker**  
-→ Expected behavior. Always use `/sync/dash` (or your custom API Route + `/dash`).
-
-**Forgot Master Key or API Route**  
-→ Check values in the D1 Console (`sys_config` key).
-
-**Free plan limits**  
-→ 100,000 requests/day. Monitor via Cloudflare Analytics integration in Advanced.
+The container binds `0.0.0.0:${PORT}` (defaults to 3000) and stores its
+database in `/data` when a volume is mounted there.
 
 ---
 
-## 🤝 Contributing
+## 📄 License & credits
 
-1. Fork the repository
-2. Create a branch
-3. Make your changes
-4. Open a Pull Request
+MIT — see [LICENSE](./LICENSE).
 
----
-
-## 📄 License
-
-MIT License — see [LICENSE](./LICENSE)
-
----
-
-<div align="center">
-
-Made with ❤️ by the Open Source Community
-
-[⭐ Star this repo](https://github.com/itsyebekhe/nahan) · [🐛 Report a bug](https://github.com/itsyebekhe/nahan/issues) · [🇮🇷 نسخه فارسی](./README_FA.md)
-
-</div>
+- **Original project:** [itsyebekhe/nahan](https://github.com/itsyebekhe/nahan) — all proxy logic,
+  dashboard, and protocol handling are the upstream authors' work, kept untouched.
+- **Railway port:** the `railway/` adapter in this repository.

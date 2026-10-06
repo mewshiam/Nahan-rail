@@ -1,0 +1,35 @@
+{
+  "name": "nahan-railway",
+  "version": "3.0.4-rail.1",
+  "description": "Nahan (VLESS/Trojan gateway) ported from Cloudflare Workers to Railway.com — runs the unmodified _worker.js on Node.js",
+  "type": "module",
+  "private": true,
+  "main": "railway/server.js",
+  "scripts": {
+    "start": "node railway/server.js",
+    "build": "node -e \"require('fs').existsSync('_worker.js') ? 0 : process.exit(1)\""
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.4.1",
+    "ws": "^8.18.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mewshiam/Nahan-rail"
+  },
+  "keywords": [
+    "nahan",
+    "railway",
+    "vless",
+    "trojan",
+    "proxy",
+    "cloudflare-workers"
+  ],
+  "license": "MIT",
+  "contributors": [
+    "itsyebekhe (original nahan author) — https://github.com/itsyebekhe/nahan"
+  ]
+}
