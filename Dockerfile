@@ -34,6 +34,12 @@ COPY --chown=node:node . .
 # persists across deploys. Without a volume the app still works (settings
 # persist per-instance in ./data).
 RUN mkdir -p /data && chown -R node:node /data
+
+# railway/server.js generates worker.mjs from _worker.js at startup, so the
+# node user must be able to create files in /app. WORKDIR creates /app as
+# root, so hand ownership of the directory itself to node (and ensure it is
+# user-writable).
+RUN chown node:node /app && chmod u+w /app
 USER node
 
 # Railway sets PORT dynamically — never hardcode it in the command.
